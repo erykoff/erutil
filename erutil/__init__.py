@@ -7,9 +7,8 @@ Sub-packages and modules:
        Ra/Dec matching tools (easy but slow)
 
 """
+from .version import __version__
 
-__version__ = 0.1
-
-import match
-import header
-
+from . import match
+from . import header
+import des
