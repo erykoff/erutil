@@ -9,9 +9,14 @@ import esutil
 import numpy as np
 import sys
 
-from ... import header
+from erutil import header
 
 def make_match_struct(infile, outfile, bands=['g','r','i','z']):
+    """
+
+
+    """
+    
     inst=fitsio.read(infile,ext=1)
 
     new_hdr = False
@@ -46,6 +51,7 @@ def make_match_struct(infile, outfile, bands=['g','r','i','z']):
     selt=[('EXPNUM','i4'),\
               ('CCDNUM','i4'),\
               ('BAND','a2'),\
+              ('AIRMASS','f4'),\
               ('NGOOD','i4'),\
               ('MAG_AUTO_OFFSET','f4'),\
               ('MAG_AUTO_OFFSET_SIGMA','f4'),\
@@ -61,6 +67,7 @@ def make_match_struct(infile, outfile, bands=['g','r','i','z']):
     for i in range(inst.size):
         sys.stdout.write('\b'*20)
         sys.stdout.write('%d of %d' % (i, inst.size))
+        sys.stdout.flush()
 
         if (new_hdr):
             hdr = header.read_astromatic_header(inst[i]['PATH'], inst[i]['HDRPATH'])
@@ -73,6 +80,7 @@ def make_match_struct(infile, outfile, bands=['g','r','i','z']):
         stats[i]['BAND'] = band
         stats[i]['EXPNUM'] = hdr['EXPNUM']
         stats[i]['CCDNUM'] = hdr['CCDNUM']
+        stats[i]['AIRMASS'] = hdr['AIRMASS']
 
         data=fitsio.read(inst[i]['PATH'],ext=2)
 
@@ -95,9 +103,9 @@ def make_match_struct(infile, outfile, bands=['g','r','i','z']):
 
             mcat['RA'][:,0] = ra
             mcat['DEC'][:,0] = dec
-            mcat['EXPNUM'][:,0] = ohdr['EXPNUM']
+            mcat['EXPNUM'][:,0] = hdr['EXPNUM']
             mcat['BAND'][:,0] = band
-            mcat['CCDNUM'][:,0] = ohdr['CCDNUM']
+            mcat['CCDNUM'][:,0] = hdr['CCDNUM']
             mcat['MAG_AUTO'][:,0] = data['MAG_AUTO'] - 25.0 + inst['MAG_ZERO'][i]
             mcat['MAGERR_AUTO'][:,0] = data['MAGERR_AUTO']
             mcat['MAG_PSF'][:,0] = data['MAG_PSF'] - 25.0 + inst['MAG_ZERO'][i]
@@ -115,9 +123,9 @@ def make_match_struct(infile, outfile, bands=['g','r','i','z']):
                 # we have matches
                 mcat['RA'][m2,i] = ra[m1]
                 mcat['DEC'][m2,i] = dec[m1]
-                mcat['EXPNUM'][m2,i] = ohdr['EXPNUM']
+                mcat['EXPNUM'][m2,i] = hdr['EXPNUM']
                 mcat['BAND'][m2,i] = band
-                mcat['CCDNUM'][m2,i] = ohdr['CCDNUM']
+                mcat['CCDNUM'][m2,i] = hdr['CCDNUM']
                 mcat['MAG_AUTO'][m2,i] = data['MAG_AUTO'][m1] - 25.0 + inst['MAG_ZERO'][i]
                 mcat['MAGERR_AUTO'][m2,i] = data['MAGERR_AUTO'][m1]
                 mcat['MAG_PSF'][m2,i] = data['MAG_PSF'][m1] - 25.0 + inst['MAG_ZERO'][i]
@@ -140,9 +148,9 @@ def make_match_struct(infile, outfile, bands=['g','r','i','z']):
                 tempcat=np.zeros(miss.size,dtype=elt)
                 tempcat['RA'][:,i] = ra[miss]
                 tempcat['DEC'][:,i] = dec[miss]
-                tempcat['EXPNUM'][:,i] = ohdr['EXPNUM']
+                tempcat['EXPNUM'][:,i] = hdr['EXPNUM']
                 tempcat['BAND'][:,i] = band
-                tempcat['CCDNUM'][:,i] = ohdr['CCDNUM']
+                tempcat['CCDNUM'][:,i] = hdr['CCDNUM']
                 tempcat['MAG_AUTO'][:,i] = data['MAG_AUTO'][miss] - 25.0 + inst['MAG_ZERO'][i]
                 tempcat['MAGERR_AUTO'][:,i] = data['MAGERR_AUTO'][miss]
                 tempcat['MAG_PSF'][:,i] = data['MAG_PSF'][miss] - 25.0 + inst['MAG_ZERO'][i]
