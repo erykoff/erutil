@@ -30,8 +30,7 @@ tablefile.close()
 
 
 
-# can we build recfile?
-packages = ['erutil']
+packages = ['erutil','erutil.des']
 ext_modules = []
 include_dirs=[]
 
@@ -61,12 +60,14 @@ except:
     stdout.write('esutil not found: please install from http://code.google.com/p/esutil/')
     sys.exit(2)
 
+exec(open('erutil/version.py').read())
 
 # data_files copies the ups/esutil.table into prefix/ups
 setup(name='erutil',
       description="Eli Rykoff's Python Utilities",
       url='https://github.com/erykoff/erutil',
       packages=packages,
+      version=__version__,
       data_files=[('ups',['ups/erutil.table'])],
       ext_modules=ext_modules,
       include_dirs=include_dirs)
