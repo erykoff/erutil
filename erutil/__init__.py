@@ -8,6 +8,8 @@ Sub-packages and modules:
 
 """
 
-__version__ == 0.1
+__version__ = 0.1
 
 import match
+import header
+
