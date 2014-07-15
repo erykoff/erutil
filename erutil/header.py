@@ -42,7 +42,8 @@ def read_astromatic_header(ofile,headfile,ext=0):
     parameters
     ----------
     ofile: original file.  May be FITS_LDAC or image.
-    headfile: astromatic header text file
+    headfile: astromatic header text file.  May be None
+        If this is None, useful to read in FITS_LDAC into pyfits header.
     ext: extension of ofile; only used if not FITS_LDAC
 
     returns
@@ -92,19 +93,20 @@ def read_astromatic_header(ofile,headfile,ext=0):
         
     hdulist.close()
 
-    fs=open(headfile)
-    for text in fs:
-        card=pyfits.Card.fromstring(text.strip())
-        if (card.key == 'END' or card.key == 'COMMENT'):
-            continue
-        if (new_pyfits):
-            hdr[card.key] = (card.value, card.comment)
-        else :
-            if (len(card.key) > 8):
-                hdr.update('hierarch '+card.key, card.value, comment=card.value)
-            else:
-                hdr.update(card.key, card.value, comment=card.comment)
-    fs.close()
+    if (headfile is not None):    
+        fs=open(headfile)
+        for text in fs:
+            card=pyfits.Card.fromstring(text.strip())
+            if (card.key == 'END' or card.key == 'COMMENT'):
+                continue
+            if (new_pyfits):
+                hdr[card.key] = (card.value, card.comment)
+            else :
+                if (len(card.key) > 8):
+                    hdr.update('hierarch '+card.key, card.value, comment=card.value)
+                else:
+                    hdr.update(card.key, card.value, comment=card.comment)
+        fs.close()
 
     return hdr
     
