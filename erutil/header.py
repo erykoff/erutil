@@ -24,6 +24,7 @@ license="""
 
 
 import pyfits
+import fitsio
 import numpy as np
 
 
@@ -111,3 +112,59 @@ def read_astromatic_header(ofile,headfile,ext=0):
     return hdr
     
         
+def read_astromatic_header2(ofile,headfile,ext=0):
+    """
+    Read in an astromatic header (.head) text file and combine with original header
+
+    parameters
+    ----------
+    ofile: original file.  May be FITS_LDAC or image.
+    headfile: astromatic header text file.  May be None
+        If this is None, useful to read in FITS_LDAC into pyfits header.
+    ext: extension of ofile; only used if not FITS_LDAC
+
+    returns
+    -------
+    fitsio header
+
+    Written by Eli Rykoff, SLAC, 2014
+    
+    """
+
+    # determine if ofile is a FITS_LDAC file
+    is_ldac = False
+
+    hdulist=fitsio.FITS(ofile)
+    
+    if 'LDAC_IMHEAD' in hdulist:
+        is_ldac = True
+
+    if (is_ldac):
+        odata=hdulist['LDAC_IMHEAD']['Field Header Card'][0]
+
+        hdr=fitsio.FITSHDR()
+        for j in range(odata.size):
+            line = odata[j].strip()
+            if line != 'END' and line[0:8] != 'CONTINUE':
+                hdr.add_record(line)
+
+    else:
+        hdr=hdulist[ext].read_header()
+
+    hdulist.close()
+
+    if (headfile is not None):
+        fs=open(headfile)
+        for text in fs:
+            r=fitsio.FITSRecord(text.strip())
+            if (r['name'] == 'COMMENT') or (r['name'] == 'HISTORY'):
+                hdr.add_record(r)
+            else :
+                if (r['name'] not in hdr) :
+                    hdr.add_record(r)
+                else :
+                    hdr[r['name']] = r['value']
+            
+        fs.close()
+
+    return hdr
