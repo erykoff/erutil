@@ -61,7 +61,7 @@ def make_match_struct(infile, outfile, bands=['g','r','i','z'],matchrad=1.0,stat
               ('DEC_OFFSET','f8'),\
               ('DEC_OFFSET_RMS','f8')]
 
-    stats=np.recarray((nimage,),dtype=selt)
+    stats=np.zeros((nimage,),dtype=selt)
     mark=0
 
     for i in range(inst.size):
