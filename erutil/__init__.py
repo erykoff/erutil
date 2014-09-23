@@ -12,3 +12,4 @@ from .version import __version__
 from . import match
 from . import header
 import des
+#from . import gaussfitter
