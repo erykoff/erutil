@@ -12,4 +12,5 @@ from .version import __version__
 from . import match
 from . import header
 import des
+import healpix
 #from . import gaussfitter
