@@ -30,7 +30,7 @@ tablefile.close()
 
 
 
-packages = ['erutil','erutil.des']
+packages = ['erutil','erutil.des','erutil.healpix']
 ext_modules = []
 include_dirs=[]
 
