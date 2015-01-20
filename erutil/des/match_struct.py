@@ -71,9 +71,9 @@ def make_match_struct(infile, outfile, bands=['g','r','i','z'],matchrad=1.0,stat
             sys.stdout.flush()
 
         if (new_hdr):
-            hdr = header.read_astromatic_header2(inst[i]['PATH'].strip(), inst[i]['HDRPATH'].strip())
+            hdr = header.read_astromatic_header2(inst['PATH'][i].strip(), inst['HDRPATH'][i].strip())
         else :
-            hdr = header.read_astromatic_header2(inst[i]['PATH'].strip(), None)
+            hdr = header.read_astromatic_header2(inst['PATH'][i].strip(), None)
 
         filt=hdr['FILTER']
         band=filt[0]
@@ -97,6 +97,18 @@ def make_match_struct(infile, outfile, bands=['g','r','i','z'],matchrad=1.0,stat
         else :
             ra = data['ALPHAWIN_J2000']
             dec = data['DELTAWIN_J2000']
+
+        # make sure ra/dec in 0-360...
+        bad,=np.where(ra > 360.0)
+        if (bad.size > 0) : ra[bad] = ra[bad] - 360.0
+        bad,=np.where(ra < 0.0)
+        if (bad.size > 0) : ra[bad] = ra[bad] + 360.0
+
+        # and wrap to make sure we don't have problems near 0
+        # (make sure to unwrap later)
+        # (this assumes no des observations around ra=180...)
+        hi,=np.where(ra > 180.0)
+        if (hi.size > 0) : ra[hi] = ra[hi] - 360.0
 
         if (i == 0):
             nstart = data.size*4
@@ -317,13 +329,20 @@ def make_match_struct(infile, outfile, bands=['g','r','i','z'],matchrad=1.0,stat
 
     # if we want to save the individual numbers, ask for it specifically
     if (saveindiv):
+        neg,=np.where(mcat1['RA'] < 0)
+        if (neg.size > 0) : mcat1['RA'][neg] = mcat1['RA'][neg] + 360.0
         fitsio.write(outfile, mcat1)
 
     # and if we don't ask for statsonly, save the mean objects
     if (not statsonly):
+        neg,=np.where(mcat2['RA_MEAN'] < 0)
+        if (neg.size > 0) : mcat2['RA_MEAN'][neg] = mcat2['RA_MEAN'][neg] + 360.0
         fitsio.write(outfile, mcat2)
 
     # and write out the stats
+    neg,=np.where(stats['RA_MEAN'] < 0)
+    if (neg.size > 0) : stats['RA_MEAN'][neg] = stats['RA_MEAN'][neg] + 360.0
+        
     fitsio.write(outfile, stats)
         
 
