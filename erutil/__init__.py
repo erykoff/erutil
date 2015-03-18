@@ -13,4 +13,5 @@ from . import match
 from . import header
 import des
 import healpix
+import region
 #from . import gaussfitter
