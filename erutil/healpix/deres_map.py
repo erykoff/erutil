@@ -17,8 +17,10 @@ def deres_map(nside_out,minfrac=0.8,minsub=1,nest=False,range=[hp.UNSEEN,np.abs(
         raise RuntimeError("Cannot set both frac_in and fracfile")
 
     if (infile is not None):
-        map_in = read_map2(infile,hdu=1,dtype=np.float32)
-    nside_in = hp.npix2nside(map_in.size)
+        _map_in = read_map2(infile,hdu=1,dtype=np.float32)
+    else:
+        _map_in = map_in.copy()
+    nside_in = hp.npix2nside(_map_in.size)
 
     if (fracfile is not None):
         frac_in = read_map2(fracfile,hdu=1,dtype=np.float32)
@@ -26,12 +28,12 @@ def deres_map(nside_out,minfrac=0.8,minsub=1,nest=False,range=[hp.UNSEEN,np.abs(
     if (frac_in is not None):
         bad,=np.where((frac_in < minfrac) & (frac_in > 0.0))
         if (bad.size > 0):
-            map_in[bad] = hp.UNSEEN
+            _map_in[bad] = hp.UNSEEN
             
     # generate pixels at old nside
     theta_in,phi_in = hp.pix2ang(nside_in, np.arange(12*nside_in*nside_in),nest=nest)
 
-    use_in, = np.where((map_in > range[0]) & (map_in < range[1]))
+    use_in, = np.where((_map_in > range[0]) & (_map_in < range[1]))
 
     # and put in out nside; note that we may want nest output
     hpix_out = hp.ang2pix(nside_out,theta_in[use_in],phi_in[use_in],nest=nest)
@@ -66,10 +68,10 @@ def deres_map(nside_out,minfrac=0.8,minsub=1,nest=False,range=[hp.UNSEEN,np.abs(
             pind=subb[i1a]
 
             if (pind.size >= minsub):
-                map_out[hpix_out_u[i]] = np.mean(map_in[use_in[pind]])
+                map_out[hpix_out_u[i]] = np.mean(_map_in[use_in[pind]])
 
                 if do_err:
-                    map_err[hpix_out_u[i]] = np.std(map_in[use_in[pind]])
+                    map_err[hpix_out_u[i]] = np.std(_map_in[use_in[pind]])
 
 
     if (outfile is not None):
